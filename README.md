@@ -1,5 +1,7 @@
 # go-q3net
 
+[![Coverage](http://gocover.io/_badge/github.com/icedream/go-q3net)](http://gocover.io/github.com/icedream/go-q3net)
+
 go-q3net is a library that allows interacting with servers that use a compatible variation of the network protocol that Quake III Arena uses.
 
 ## Work in progress
