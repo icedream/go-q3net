@@ -71,14 +71,17 @@ func UnmarshalMessage(data []byte) (*Message, error) {
 	//log.Printf("Got message with command name %q", commandName)
 
 	extra := []byte(nil)
-	if data[4+splitPos] == 92 {
-		splitPos--
-	}
+
 	if len(data) > 4+splitPos {
-		extra = data[4+splitPos+1:]
-	}
-	for len(extra) > 0 && extra[len(extra)-1] == 0 {
-		extra = extra[0 : len(extra)-1]
+		if data[4+splitPos] == '\\' {
+			splitPos--
+		}
+		if len(data) > 4+splitPos {
+			extra = data[4+splitPos+1:]
+		}
+		for len(extra) > 0 && extra[len(extra)-1] == 0 {
+			extra = extra[0 : len(extra)-1]
+		}
 	}
 
 	return &Message{

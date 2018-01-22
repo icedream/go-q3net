@@ -37,7 +37,6 @@ func TestParseMessage(t *testing.T) {
 	msg = append(msg, 0x20)
 	msg = append(msg, []byte("'yz\"y'")...)
 	msg = append(msg, 0x0A)
-
 	parsedMsg, err := UnmarshalMessage(msg)
 	if err != nil {
 		t.Errorf("Parser threw an error: %v", err)
@@ -52,6 +51,60 @@ func TestParseMessage(t *testing.T) {
 		assert.Equal(t, "xxx", args[0])
 		assert.Equal(t, "yy\"y", args[1])
 		assert.Equal(t, "yz\"y", args[2])
+	default:
+		t.Errorf("Unexpected parsed command name: %v", parsedMsg.Name)
+	}
+}
+
+func TestParseMessage_Crash_Unknown1(t *testing.T) {
+	msg := []byte("\xbd\xbf\x00G\xef\x85\xff\xf0\xbd\xbf\x16")
+	parsedMsg, err := UnmarshalMessage(msg)
+	if err != nil {
+		t.Errorf("Parser threw an error: %v", err)
+	}
+	assert.NotEmpty(t, parsedMsg, "parsedMsg should not be empty")
+}
+
+func TestParseMessage_Nothing(t *testing.T) {
+	msg := []byte{}
+	parsedMsg, err := UnmarshalMessage(msg)
+	if err == nil {
+		t.Error("Parser did not throw an error on invalid message!")
+	}
+	assert.Empty(t, parsedMsg, "parsedMsg should be empty on error")
+}
+
+func TestParseMessage_InvalidHeaderWithoutContent(t *testing.T) {
+	msg := []byte{'0', '0', '0', '0'}
+	parsedMsg, err := UnmarshalMessage(msg)
+	if err != nil {
+		t.Errorf("Parser threw an error: %v", err)
+	}
+	assert.Empty(t, parsedMsg.Name, "command name must be empty")
+}
+
+func TestParseMessage_WithoutContent(t *testing.T) {
+	msg := []byte{0xff, 0xff, 0xff, 0xff}
+	parsedMsg, err := UnmarshalMessage(msg)
+	if err != nil {
+		t.Errorf("Parser threw an error: %v", err)
+	}
+	assert.Empty(t, parsedMsg.Name, "command name must be empty")
+}
+
+func TestParseMessage_WithoutArguments(t *testing.T) {
+	msg := append([]byte{0xff, 0xff, 0xff, 0xff}, []byte("getinfo")...)
+	parsedMsg, err := UnmarshalMessage(msg)
+	if err != nil {
+		t.Errorf("Parser threw an error: %v", err)
+	}
+	switch parsedMsg.Name {
+	case "getinfo":
+		args := parsedMsg.GetArguments()
+		if !assert.Equal(t, 0, len(args)) {
+			t.Fail()
+			return
+		}
 	default:
 		t.Errorf("Unexpected parsed command name: %v", parsedMsg.Name)
 	}
