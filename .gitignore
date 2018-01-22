@@ -22,3 +22,8 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# go-fuzz
+crashers/
+suppressions/
+*.zip
