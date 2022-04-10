@@ -29,6 +29,18 @@ func TestGenerateMessage(t *testing.T) {
 }
 
 func TestParseMessage(t *testing.T) {
+	testWithDelimiter(t, 0x0A)
+}
+
+func TestParseMessage_ZeroDelimiter(t *testing.T) {
+	testWithDelimiter(t, 0x00)
+}
+
+func TestParseMessage_DoubleZeroDelimiter(t *testing.T) {
+	testWithDelimiter(t, 0x00, 0x00)
+}
+
+func testWithDelimiter(t *testing.T, delimiter ...byte) {
 	msg := append([]byte{0xff, 0xff, 0xff, 0xff}, []byte("getinfo")...)
 	msg = append(msg, 0x20)
 	msg = append(msg, []byte("xxx")...)
@@ -36,7 +48,7 @@ func TestParseMessage(t *testing.T) {
 	msg = append(msg, []byte("\"yy\\\"y\"")...)
 	msg = append(msg, 0x20)
 	msg = append(msg, []byte("'yz\"y'")...)
-	msg = append(msg, 0x0A)
+	msg = append(msg, delimiter...)
 	parsedMsg, err := UnmarshalMessage(msg)
 	if err != nil {
 		t.Errorf("Parser threw an error: %v", err)
